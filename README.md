@@ -90,7 +90,6 @@ weights/
   final_model.pth            SUBMITTED checkpoint -- use this one
   baseline_models/           the four ablation checkpoints (not submitted, kept for reproducibility)
 results/
-  results_composite.png      metrics table + visual comparisons
   pipeline_diagram.png       architecture diagram
   sample_outputs/            per-image before/after comparisons
 solution_presentation.pptx
