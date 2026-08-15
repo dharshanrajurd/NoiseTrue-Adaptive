@@ -36,7 +36,10 @@ def parse_args():
     p = argparse.ArgumentParser(description="Evaluate NoiseTrue-Adaptive checkpoints")
     p.add_argument("--gt_dir", required=True)
     p.add_argument("--noisy_dir", required=True)
-    p.add_argument("--weights_dir", default=os.path.join(HERE, "weights"))
+    p.add_argument("--weights_dir", default=os.path.join(HERE, "weights"),
+                   help="Folder containing final_model.pth")
+    p.add_argument("--ablation_dir", default=os.path.join(HERE, "weights", "baseline_models"),
+                   help="Folder containing the four ablation checkpoints")
     p.add_argument("--seed", type=int, default=42)
     return p.parse_args()
 
@@ -92,19 +95,22 @@ def main():
 
     lpips_fn = lpips.LPIPS(net="alex").to(device)
 
+    # final submitted model lives directly in weights/; the four ablation
+    # checkpoints live in weights/baseline_models/ to keep the submitted
+    # model unambiguous for a reviewer skimming the folder
     candidates = [
-        ("U-Net baseline",              lambda: RestorationUNet(),                  "baseline_model.pth"),
-        ("U-Net + FiLM",                lambda: RestorationUNetAdaptive(),          "adaptive_model.pth"),
-        ("NAFNet-lite baseline",        lambda: NAFNetLite(),                       "nafnet_baseline_model.pth"),
-        ("NAFNet-lite + FiLM",          lambda: NAFNetLiteAdaptive(),               "nafnet_adaptive_model.pth"),
-        ("FINAL wide NAFNet+FiLM+VGG",  lambda: NAFNetLiteAdaptive(base_ch=48),     "final_model.pth"),
+        ("U-Net baseline",              lambda: RestorationUNet(),                  args.ablation_dir, "baseline_model.pth"),
+        ("U-Net + FiLM",                lambda: RestorationUNetAdaptive(),          args.ablation_dir, "adaptive_model.pth"),
+        ("NAFNet-lite baseline",        lambda: NAFNetLite(),                       args.ablation_dir, "nafnet_baseline_model.pth"),
+        ("NAFNet-lite + FiLM",          lambda: NAFNetLiteAdaptive(),               args.ablation_dir, "nafnet_adaptive_model.pth"),
+        ("FINAL wide NAFNet+FiLM+VGG",  lambda: NAFNetLiteAdaptive(base_ch=48),     args.weights_dir,   "final_model.pth"),
     ]
 
     results = {}
-    for name, ctor, fname in candidates:
-        path = os.path.join(args.weights_dir, fname)
+    for name, ctor, folder, fname in candidates:
+        path = os.path.join(folder, fname)
         if not os.path.exists(path):
-            print(f"Skipping {name} -- checkpoint not found: {fname}\n")
+            print(f"Skipping {name} -- checkpoint not found: {path}\n")
             continue
         model = ctor()
         model.load_state_dict(torch.load(path, map_location=device))
