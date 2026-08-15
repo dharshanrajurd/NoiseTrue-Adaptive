@@ -1,0 +1,34 @@
+# Final submitted model configuration
+# NoiseTrue-Adaptive -- wide NAFNet-lite + FiLM + VGG perceptual loss
+
+model:
+  architecture: NAFNetLiteAdaptive
+  base_channels: 48
+  film_conditioning_dim: 32
+  film_init: zero  # scale/shift initialized to 0 -- model starts as identity, only
+                    # deviates from baseline behavior if it reduces the loss
+
+training:
+  epochs: 80
+  batch_size: 16
+  learning_rate: 0.001
+  lr_schedule: cosine_annealing
+  optimizer: Adam
+  random_seed: 42  # controls train/val split -- fixed for reproducibility
+
+loss:
+  charbonnier_weight: 1.0
+  edge_sobel_weight: 0.1
+  vgg_perceptual_weight: 0.05
+  vgg_layers: features[:16]  # VGG16, up to and including the 4th conv block
+
+augmentation:
+  horizontal_flip: true
+  vertical_flip: true
+  flip_probability: 0.5
+
+data:
+  train_val_split: 0.9 / 0.1
+  input_format: float32 .npy pairs (GT, NoisyLR)
+  input_range: GT normalized to [0,1]; NoisyLR may exceed [0,1] (intentional,
+    from speckle noise -- preserved, not clipped, at load time)
