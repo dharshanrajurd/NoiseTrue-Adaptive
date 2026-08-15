@@ -5,6 +5,8 @@
 Submission for SEMICON India Hackathon 2026, KLA Track — *AI-Based Restoration of
 Degraded Images for Semiconductor Inspection*.
 
+**[Demo Video](https://youtu.be/PASTE_YOUR_VIDEO_ID_HERE)** | **[Solution Deck](solution_presentation.pptx)**
+
 ---
 
 ## Problem
@@ -90,6 +92,7 @@ weights/
   final_model.pth            SUBMITTED checkpoint -- use this one
   baseline_models/           the four ablation checkpoints (not submitted, kept for reproducibility)
 results/
+  results_composite.png      metrics table + visual comparisons
   pipeline_diagram.png       architecture diagram
   sample_outputs/            per-image before/after comparisons
 solution_presentation.pptx
