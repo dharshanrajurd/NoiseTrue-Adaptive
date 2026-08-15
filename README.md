@@ -87,7 +87,8 @@ src/
   advanced_loss.py           VGG16 perceptual loss + combined loss
   train_ablations.py         reproduces the four ablation checkpoints
 weights/
-  final_model.pth            submitted checkpoint
+  final_model.pth            SUBMITTED checkpoint -- use this one
+  baseline_models/           the four ablation checkpoints (not submitted, kept for reproducibility)
 results/
   results_composite.png      metrics table + visual comparisons
   pipeline_diagram.png       architecture diagram
@@ -128,9 +129,10 @@ python src/train_ablations.py --gt_dir <path/to/GT> --noisy_dir <path/to/NoisyLR
 python evaluate.py --gt_dir <path/to/GT> --noisy_dir <path/to/NoisyLR>
 ```
 
-Reports PSNR, SSIM, LPIPS, per-image time and parameter count for every checkpoint
-found in `weights/`. Missing checkpoints are skipped, so this runs with just the final
-model if that is all that is present.
+Reports PSNR, SSIM, LPIPS, per-image time and parameter count for the final model
+(`weights/final_model.pth`) and, if present, the four ablation checkpoints in
+`weights/baseline_models/`. Missing checkpoints are skipped rather than causing a
+failure, so this runs with just the final model if that is all that is present.
 
 ## Input / output contract
 
