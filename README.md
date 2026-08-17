@@ -74,6 +74,7 @@ Sample restorations, the full comparison figure and the pipeline diagram are in 
 
 ```
 README.md
+LICENSE.md                  
 requirements.txt
 train.py                     reproduces the submitted checkpoint
 inference.py                 standalone inference (mandatory deliverable)
