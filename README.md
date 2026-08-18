@@ -77,9 +77,7 @@ README.md
 LICENSE.md                  
 requirements.txt
 train.py                     reproduces the submitted checkpoint
-inference.py                 standalone inference (mandatory deliverable)
-evaluate.py                  reproduces the ablation table above
-demo.py                      narrated live demo used for the video
+run.py                       official entry point: python run.py <input-dir> <output-dir>
 configs/
   final_model_config.yaml    every hyperparameter of the final run
 src/
@@ -89,7 +87,7 @@ src/
   dataset_augmented.py       dataset with flip augmentation
   advanced_loss.py           VGG16 perceptual loss + combined loss
   train_ablations.py         reproduces the four ablation checkpoints
-weights/
+models/
   final_model.pth            SUBMITTED checkpoint -- use this one
   baseline_models/           the four ablation checkpoints (not submitted, kept for reproducibility)
 results/
