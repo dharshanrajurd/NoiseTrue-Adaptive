@@ -36,10 +36,8 @@ def parse_args():
     p = argparse.ArgumentParser(description="Evaluate NoiseTrue-Adaptive checkpoints")
     p.add_argument("--gt_dir", required=True)
     p.add_argument("--noisy_dir", required=True)
-    p.add_argument("--weights_dir", default=os.path.join(HERE, "weights"),
-                   help="Folder containing final_model.pth")
-    p.add_argument("--ablation_dir", default=os.path.join(HERE, "weights", "baseline_models"),
-                   help="Folder containing the four ablation checkpoints")
+    p.add_argument("--weights_dir", default=os.path.join(HERE, "models"), ...)
+    p.add_argument("--ablation_dir", default=os.path.join(HERE, "models", "baseline_models"), ...)
     p.add_argument("--seed", type=int, default=42)
     return p.parse_args()
 
