@@ -5,6 +5,8 @@
 Submission for SEMICON India Hackathon 2026, KLA Track — *AI-Based Restoration of
 Degraded Images for Semiconductor Inspection*.
 
+**[Demo Video](https://youtu.be/GsRu_q6-TAo)** | **[Solution Deck (PDF)](https://drive.google.com/file/d/1EAIBYGKRnK-0wlb35GZI8O3Y14XANPHX/view?usp=sharing)** | **[Solution Deck (PPTX)](https://docs.google.com/presentation/d/1_WtXxRmzj7e2SBih-oGFq3mKN2llAlTT/edit?usp=sharing)**
+
 ---
 
 ## Problem
@@ -72,6 +74,7 @@ Sample restorations, the full comparison figure and the pipeline diagram are in 
 
 ```
 README.md
+LICENSE.md                  
 requirements.txt
 train.py                     reproduces the submitted checkpoint
 inference.py                 standalone inference (mandatory deliverable)
@@ -87,12 +90,13 @@ src/
   advanced_loss.py           VGG16 perceptual loss + combined loss
   train_ablations.py         reproduces the four ablation checkpoints
 weights/
-  final_model.pth            submitted checkpoint
+  final_model.pth            SUBMITTED checkpoint -- use this one
+  baseline_models/           the four ablation checkpoints (not submitted, kept for reproducibility)
 results/
   results_composite.png      metrics table + visual comparisons
   pipeline_diagram.png       architecture diagram
   sample_outputs/            per-image before/after comparisons
-solution_presentation.pptx
+solution_presentation.pptx  (also hosted on Google Drive -- see link at top of this README)
 ```
 
 ## Setup
@@ -128,9 +132,10 @@ python src/train_ablations.py --gt_dir <path/to/GT> --noisy_dir <path/to/NoisyLR
 python evaluate.py --gt_dir <path/to/GT> --noisy_dir <path/to/NoisyLR>
 ```
 
-Reports PSNR, SSIM, LPIPS, per-image time and parameter count for every checkpoint
-found in `weights/`. Missing checkpoints are skipped, so this runs with just the final
-model if that is all that is present.
+Reports PSNR, SSIM, LPIPS, per-image time and parameter count for the final model
+(`weights/final_model.pth`) and, if present, the four ablation checkpoints in
+`weights/baseline_models/`. Missing checkpoints are skipped rather than causing a
+failure, so this runs with just the final model if that is all that is present.
 
 ## Input / output contract
 
