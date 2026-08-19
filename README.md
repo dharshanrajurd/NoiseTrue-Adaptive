@@ -5,7 +5,7 @@
 Submission for SEMICON India Hackathon 2026, KLA Track — *AI-Based Restoration of
 Degraded Images for Semiconductor Inspection*.
 
-  **[Demo Video](https://youtu.be/GsRu_q6-TAo)** | **[Solution Deck (PDF)](https://drive.google.com/file/d/1EAIBYGKRnK-0wlb35GZI8O3Y14XANPHX/view?usp=sharing)** | **[Solution Deck (PPTX)](https://docs.google.com/presentation/d/1_WtXxRmzj7e2SBih-oGFq3mKN2llAlTT/edit?usp=sharing)**
+**[Demo Video](https://youtu.be/GsRu_q6-TAo)** | **[Solution Deck (PDF)](https://drive.google.com/file/d/1EAIBYGKRnK-0wlb35GZI8O3Y14XANPHX/view?usp=sharing)** | **[Solution Deck (PPTX)](https://docs.google.com/presentation/d/1_WtXxRmzj7e2SBih-oGFq3mKN2llAlTT/edit?usp=sharing)**
 
 ---
 
@@ -18,7 +18,9 @@ combination and strength may be present in a single image. The restored output i
 scored on PSNR, SSIM and LPIPS against hidden ground truth, on both in-distribution
 and out-of-distribution content, with end-to-end throughput also benchmarked.
 
-## Approach
+## Pipeline
+
+![Pipeline diagram](results/pipeline_diagram_clean.png)
 
 A NAFNet-lite encoder–decoder performs joint denoising, deblurring and 2× super-resolution
 in a **single forward pass**, ending in a PixelShuffle upsample head. Each NAFBlock uses
@@ -66,7 +68,18 @@ bottleneck features from step one, and training spends its budget recovering rat
 learning) and switching to zero-initialisation is what turned the idea into a measurable
 gain. FiLM then improved results on both backbones independently.
 
-Sample restorations, the full comparison figure and the pipeline diagram are in `results/`.
+## Visual results
+
+**U-Net+FiLM vs NAFNet+FiLM** — noisy input, both models' outputs, and ground truth,
+side by side:
+
+![Comparison on a dense grid structure](results/sample_outputs/000156_comparison.png)
+*Dense periodic grid structure — the final architecture recovers the lattice lines the U-Net smears.*
+
+![Comparison on a fabric/fold structure](results/sample_outputs/000212_comparison.png)
+*Fold and edge detail — sharper, closer to ground truth, no ringing artifacts.*
+
+More examples are in `results/sample_outputs/`.
 
 ---
 
@@ -74,7 +87,7 @@ Sample restorations, the full comparison figure and the pipeline diagram are in 
 
 ```
 README.md
-LICENSE.md                  
+LICENSE.md
 requirements.txt
 train.py                     reproduces the submitted checkpoint
 run.py                       official entry point: python run.py <input-dir> <output-dir>
@@ -91,8 +104,8 @@ models/
   final_model.pth            SUBMITTED checkpoint -- use this one
   baseline_models/           the four ablation checkpoints (not submitted, kept for reproducibility)
 results/
-  results_composite.png      metrics table + visual comparisons
-  pipeline_diagram.png       architecture diagram
+  pipeline_diagram_clean.png architecture diagram (shown above)
+  results_composite.png      full metrics table + visual comparisons
   sample_outputs/            per-image before/after comparisons
 solution_presentation.pptx  (also hosted on Google Drive -- see link at top of this README)
 ```
@@ -106,13 +119,21 @@ pip install -r requirements.txt
 ## Running inference
 
 ```bash
-python inference.py --input_dir <degraded_npy_folder> --output_dir <restored_folder>
+python run.py <input-dir> <output-dir>
 ```
 
-Detects and uses a GPU automatically. Weights load from `weights/final_model.pth` by
-default; override with `--model_path`. Images sharing a shape are batched together
-(`--batch_size`, default 16). Outputs are clipped to [0,1] before saving, since the
-evaluator scores files exactly as written. **No source-code edits are required.**
+This is the official, self-contained entry point — the model architecture is defined
+directly inside `run.py`, so it has no dependency on the `src/` folder. Detects and uses
+a GPU automatically, falls back to CPU otherwise. Weights load from
+`models/final_model.pth` by default; override with `--model_path`. Images sharing a shape
+are batched together (`--batch_size`, default 16). Outputs are clipped to [0,1] and
+sanitised of any NaN/Inf values before saving, since the evaluator scores files exactly
+as written. **No internet access, API keys, or manual source-code edits are required.**
+
+Example:
+```bash
+python run.py ./test_inputs ./test_outputs
+```
 
 ## Reproducing training
 
@@ -131,8 +152,8 @@ python evaluate.py --gt_dir <path/to/GT> --noisy_dir <path/to/NoisyLR>
 ```
 
 Reports PSNR, SSIM, LPIPS, per-image time and parameter count for the final model
-(`weights/final_model.pth`) and, if present, the four ablation checkpoints in
-`weights/baseline_models/`. Missing checkpoints are skipped rather than causing a
+(`models/final_model.pth`) and, if present, the four ablation checkpoints in
+`models/baseline_models/`. Missing checkpoints are skipped rather than causing a
 failure, so this runs with just the final model if that is all that is present.
 
 ## Input / output contract
@@ -140,9 +161,9 @@ failure, so this runs with just the final model if that is all that is present.
 - **Input:** `.npy` files, float32, single channel, 128×128 or 256×256. Values may fall
   outside [0,1]; they are loaded as-is and never clipped on input, since that
   out-of-range signal is real information from the speckle process.
-- **Output:** `.npy` files, float32, single channel, exactly 2× the input resolution
-  (256×256 or 512×512), clipped to [0,1], written to `--output_dir` under the **same
-  filename** as the corresponding input.
+- **Output:** `.npy` files, float32, single channel, shape `(H, W)`, exactly 2× the input
+  resolution (256×256 or 512×512), clipped to [0,1] with no NaN/Inf, written to
+  `<output-dir>` under the **same filename** as the corresponding input.
 
 ## Experiment configuration
 
@@ -178,6 +199,9 @@ No other external datasets or pretrained weights were used.
 
 ## Future work
 
+- Self-ensembling at inference (averaging predictions across flipped/rotated inputs) for
+  a further quality boost — not included in the submitted pipeline since it trades
+  inference speed for accuracy, and throughput is a scored criterion.
 - Frequency-band-aware processing (wavelet decomposition) to separate noise-heavy from
   structure-heavy content before restoration.
 - Self-supervised cycle-consistency loss as an additional training signal.
